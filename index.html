@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tabs</title>
+<link rel="icon" type="image/png" href="favicon.png">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+  :root{
+    --paper:#ffffff;--ink:#1a1416;--muted:#8a8082;--line:#ececec;
+    --accent:#ccd5ae;--accent-soft:#fdecec;--settled:#c2bcbc;--green:#4a7c59;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;
+    line-height:1.5;padding:32px 20px 90px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:880px;margin:0 auto;}
+  header{margin-bottom:8px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:40px;letter-spacing:-.01em;line-height:1;}
+
+  .card{border:1px solid var(--line);border-radius:2px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
+  .conn{margin:18px 0 0;padding:14px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .conn input{flex:1;min-width:220px;font-family:'JetBrains Mono',monospace;font-size:12px;
+    padding:9px 11px;border:1px solid var(--line);border-radius:2px;color:var(--ink);}
+  .conn input:focus{outline:none;border-color:var(--accent);}
+  .btn-dark{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--ink);color:var(--paper);border:none;padding:10px 14px;border-radius:2px;cursor:pointer;transition:.15s;}
+  .btn-dark:hover{background:var(--accent);} .btn-dark:disabled{opacity:.4;cursor:not-allowed;}
+  .status{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;}
+  .status.ok{color:var(--green);} .status.err{color:var(--accent);} .status.warn{color:var(--accent);}
+
+  /* ---- Setup screen ---- */
+  .setup{margin:24px 0;padding:30px;}
+  .setup h2{font-family:'Fraunces',serif;font-weight:500;font-size:24px;margin-bottom:6px;}
+  .setup p{color:var(--muted);font-size:14px;margin-bottom:20px;}
+  .setup label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px;}
+  .setup .count-row{display:flex;gap:8px;align-items:center;margin-bottom:22px;}
+  .setup .count-row button{width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:2px;
+    font-size:18px;cursor:pointer;color:var(--ink);}
+  .setup .count-row button:hover{border-color:var(--accent);color:var(--accent);}
+  .setup .count-row .n{font-family:'Fraunces',serif;font-size:26px;min-width:34px;text-align:center;}
+  .setup .names{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+  .setup .names input{font-size:15px;padding:11px 12px;border:1px solid var(--line);border-radius:2px;
+    color:var(--ink);width:100%;}
+  .setup .names input:focus{outline:none;border-color:var(--accent);}
+  .setup .swatch{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle;}
+  .name-line{display:flex;align-items:center;gap:2px;}
+
+  /* ---- Tabs ---- */
+  .tabs{display:flex;gap:2px;margin:26px 0 0;border-bottom:1px solid var(--line);}
+  .tab{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    padding:12px 18px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;background:none;border-top:none;border-left:none;border-right:none;}
+  .tab.active{color:var(--ink);border-bottom-color:var(--accent);}
+  .tab:hover{color:var(--ink);}
+
+  /* ---- Settlement ---- */
+  .balance{margin:24px 0;padding:26px 30px;position:relative;overflow:hidden;}
+  .balance::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);}
+  .balance .lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+  .standings{display:flex;flex-wrap:wrap;gap:10px 26px;margin-bottom:20px;}
+  .standing{display:flex;align-items:center;gap:8px;font-size:14px;}
+  .standing .dot{width:9px;height:9px;border-radius:50%;}
+  .standing .amt{font-variant-numeric:tabular-nums;font-weight:600;}
+  .standing .amt.pos{color:var(--green);} .standing .amt.neg{color:var(--accent);}
+  .standing .name{color:var(--ink);}
+  .settle-list{border-top:1px solid var(--line);padding-top:16px;}
+  .settle-list .h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+  .pay{font-family:'Fraunces',serif;font-size:20px;font-weight:500;margin:5px 0;}
+  .pay .amt{color:var(--accent);}
+  .pay .arrow{color:var(--muted);margin:0 8px;font-family:'Inter';font-size:15px;}
+  .all-square{font-family:'Fraunces',serif;font-size:24px;color:var(--green);}
+  .settle-btn{margin-top:16px;background:none;border:1px solid var(--line);color:var(--muted);
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    padding:9px 14px;border-radius:2px;cursor:pointer;transition:.15s;}
+  .settle-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+  /* ---- Add row ---- */
+  .add{margin:20px 0;padding:18px 20px;}
+  .add .fields{display:grid;grid-template-columns:1fr 110px 150px 1fr auto;gap:10px;align-items:center;}
+  .add input,.add select{font-family:inherit;font-size:14px;padding:11px 12px;border:1px solid var(--line);
+    border-radius:2px;background:#fff;color:var(--ink);width:100%;}
+  .add input:focus,.add select:focus{outline:none;border-color:var(--accent);}
+  .add .btn-dark{padding:12px 18px;white-space:nowrap;}
+  .participants{margin-top:14px;}
+  .participants .plabel{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{display:flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--line);border-radius:20px;
+    cursor:pointer;font-size:13px;user-select:none;transition:.12s;}
+  .chip .cdot{width:8px;height:8px;border-radius:50%;}
+  .chip.off{opacity:.35;}
+  .chip.on{border-color:var(--ink);}
+
+  /* ---- Ledger rows ---- */
+  .ledger{border-top:1px solid var(--line);margin-top:8px;}
+  .row{display:grid;grid-template-columns:16px 1fr 130px 90px auto;gap:14px;align-items:center;
+    padding:15px 8px;border-bottom:1px solid var(--line);}
+  .row .who-tag{width:9px;height:9px;border-radius:50%;justify-self:center;}
+  .row .item{font-size:15px;}
+  .row .item .note{display:block;font-size:12px;color:var(--muted);margin-top:2px;}
+  .row .item .parts{display:block;font-size:11px;color:var(--muted);margin-top:3px;font-family:'JetBrains Mono',monospace;letter-spacing:.02em;}
+  .row .who{font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right;}
+  .row .price{font-variant-numeric:tabular-nums;font-weight:600;font-size:15px;text-align:right;}
+  .row .actions{display:flex;gap:6px;justify-self:end;}
+  .icon{background:none;border:1px solid var(--line);border-radius:2px;width:30px;height:30px;cursor:pointer;
+    color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center;transition:.15s;}
+  .icon:hover{border-color:var(--accent);color:var(--accent);}
+  .icon.done:hover{border-color:var(--green);color:var(--green);}
+  .row.settled{opacity:.5;} .row.settled .item{text-decoration:line-through;color:var(--settled);}
+  .row.settled .price{text-decoration:line-through;}
+  .row.settled .who-tag{background:var(--settled)!important;}
+  .row.due .price{color:var(--accent);}
+  .empty{padding:44px 8px;text-align:center;color:var(--muted);font-size:14px;}
+  .seclabel{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);margin:30px 0 4px;display:flex;justify-content:space-between;align-items:center;}
+  .refresh{background:none;border:none;color:var(--muted);cursor:pointer;font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
+  .refresh:hover{color:var(--accent);}
+  .tiny{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.04em;}
+  .cornerlink{background:none;border:none;color:var(--muted);cursor:pointer;font-family:'JetBrains Mono',monospace;
+    font-size:10px;letter-spacing:.08em;text-transform:uppercase;text-decoration:underline;}
+  .cornerlink:hover{color:var(--accent);}
+  .hidden{display:none!important;}
+  .monthnote{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 6px;}
+
+  @media(max-width:680px){
+    .add .fields{grid-template-columns:1fr 1fr;} .add .btn-dark{grid-column:1/-1;}
+    .row{grid-template-columns:14px 1fr auto;gap:10px;} .row .who{display:none;}
+    .row .actions{grid-column:2/-1;justify-self:start;margin-top:4px;} h1{font-size:32px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="householdName">House Finance</div>
+    <h1>House Finance</h1>
+  </header>
+
+  <div class="conn card">
+    <input id="urlInput" placeholder="Paste your Apps Script Web app URL (…/exec)" />
+    <button class="btn-dark" id="connectBtn">Connect</button>
+    <span class="status" id="status">Not connected</span>
+  </div>
+
+  <!-- ============ SETUP SCREEN ============ -->
+  <div class="setup card hidden" id="setupScreen">
+    <h2>Set up your household</h2>
+    <p>Enter everyone who shares expenses. You can do this once — it saves to the sheet for everyone.</p>
+    <label>How many people?</label>
+    <div class="count-row">
+      <button id="decBtn">–</button>
+      <span class="n" id="countN">2</span>
+      <button id="incBtn">+</button>
+    </div>
+    <label>Names</label>
+    <div class="names" id="nameInputs"></div>
+    <button class="btn-dark" id="saveSetup">Save household</button>
+  </div>
+
+  <!-- ============ MAIN APP ============ -->
+  <div id="mainApp" class="hidden">
+    <div class="balance card" id="balance">
+      <div class="lbl">Settlement · all unsettled items, both tabs</div>
+      <div class="standings" id="standings"></div>
+      <div class="settle-list" id="settleList"></div>
+      <button class="settle-btn" id="settleAll">Settle all open items</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="household">Household</button>
+      <button class="tab" data-tab="recurring">Recurring Finance</button>
+    </div>
+
+    <!-- Add form (shared, adapts per tab) -->
+    <div class="add card">
+      <div class="fields">
+        <input id="fItem" placeholder="Item (e.g. Dining table)" />
+        <input id="fPrice" type="number" step="0.01" placeholder="Price" />
+        <select id="fWho"></select>
+        <input id="fNote" placeholder="Note (optional)" />
+        <button class="btn-dark" id="addBtn">Add</button>
+      </div>
+      <div class="participants">
+        <div class="plabel">Split among <span class="tiny" id="splitHint"></span></div>
+        <div class="chips" id="partChips"></div>
+      </div>
+    </div>
+
+    <!-- Household tab -->
+    <div id="householdTab">
+      <div class="seclabel"><span>Open</span><button class="refresh" id="refreshBtn">↻ Refresh</button></div>
+      <div class="ledger" id="openLedger"></div>
+      <div class="seclabel" id="settledLabel"><span>Settled</span></div>
+      <div class="ledger" id="settledLedger"></div>
+    </div>
+
+    <!-- Recurring tab -->
+    <div id="recurringTab" class="hidden">
+      <p class="monthnote" id="monthNote"></p>
+      <div class="seclabel"><span>Standing bills</span></div>
+      <div class="ledger" id="recurringLedger"></div>
+    </div>
+
+    <div style="margin-top:40px;text-align:right;">
+      <button class="cornerlink" id="resetHousehold">Reset household</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const URL_KEY='house_finance_apps_script_url';
+let API='';
+let config=null;           // {people:[{name,color}]}
+let ledger=[];             // one-time items
+let recurring=[];          // standing bills
+let activeTab='household';
+let setupCount=2;
+
+// palette assigned to people in order
+const PALETTE=['#dc2626','#2563eb','#16a34a','#d97706','#7c3aed','#db2777','#0891b2','#65a30d'];
+
+const money=n=>'$'+n.toFixed(2);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const setStatus=(m,c)=>{const s=$('status');s.textContent=m;s.className='status '+(c||'');};
+const colorOf=name=>{const p=config?.people.find(x=>x.name===name);return p?p.color:'#999';};
+const monthKey=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');};
+
+async function api(method,body){
+  if(!API) throw new Error('no url');
+  const opts={method,redirect:'follow'};
+  if(method==='POST'){
+    // text/plain avoids a CORS preflight against Apps Script
+    opts.headers={'Content-Type':'text/plain;charset=utf-8'};
+    opts.body=JSON.stringify(body);
+  }
+  const r=await fetch(API,opts);
+  return r.json();
+}
+
+async function loadData(){
+  try{
+    setStatus('Loading…','warn');
+    const data=await api('GET');
+    config=data.config&&data.config.people&&data.config.people.length?data.config:null;
+    ledger=data.ledger||[];
+    recurring=data.recurring||[];
+    if(!config){ showSetup(); }
+    else { showApp(); }
+    setStatus('Connected','ok');
+  }catch(e){ setStatus('Could not reach sheet','err'); }
+}
+
+/* ---------------- SETUP ---------------- */
+function showSetup(){
+  $('setupScreen').classList.remove('hidden');
+  $('mainApp').classList.add('hidden');
+  renderNameInputs();
+}
+function renderNameInputs(){
+  $('countN').textContent=setupCount;
+  const box=$('nameInputs');
+  const existing=[...box.querySelectorAll('input')].map(i=>i.value);
+  box.innerHTML='';
+  for(let i=0;i<setupCount;i++){
+    const wrap=document.createElement('div');wrap.className='name-line';
+    const sw=document.createElement('span');sw.className='swatch';sw.style.background=PALETTE[i%PALETTE.length];
+    const inp=document.createElement('input');inp.placeholder='Person '+(i+1)+' name';
+    inp.value=existing[i]||'';
+    wrap.appendChild(sw);wrap.appendChild(inp);box.appendChild(wrap);
+  }
+}
+$('incBtn').onclick=()=>{if(setupCount<8){setupCount++;renderNameInputs();}};
+$('decBtn').onclick=()=>{if(setupCount>2){setupCount--;renderNameInputs();}};
+$('saveSetup').onclick=async()=>{
+  const names=[...$('nameInputs').querySelectorAll('input')].map(i=>i.value.trim()).filter(Boolean);
+  if(names.length<2){alert('Enter at least two names.');return;}
+  if(new Set(names).size!==names.length){alert('Names must be unique.');return;}
+  config={people:names.map((name,i)=>({name,color:PALETTE[i%PALETTE.length]}))};
+  setStatus('Saving…','warn');
+  try{
+    await api('POST',{action:'saveConfig',config});
+    showApp();
+    setStatus('Connected','ok');
+  }catch(e){setStatus('Save failed','err');}
+};
+
+/* ---------------- MAIN APP SHELL ---------------- */
+function showApp(){
+  $('setupScreen').classList.add('hidden');
+  $('mainApp').classList.remove('hidden');
+  const names=config.people.map(p=>p.name);
+  $('householdName').textContent=names.join(' · ');
+  document.querySelector('h1').textContent='House Finance';
+  // payer dropdown
+  $('fWho').innerHTML=config.people.map(p=>`<option value="${esc(p.name)}">${esc(p.name)} paid</option>`).join('');
+  $('monthNote').textContent='This month: '+monthKey()+'. Bills marked paid reset automatically next month.';
+  buildChips();
+  render();
+}
+
+/* participant chips — default all ON */
+let chipState={}; // name -> bool
+function buildChips(){
+  chipState={};
+  config.people.forEach(p=>chipState[p.name]=true);
+  renderChips();
+}
+function renderChips(){
+  $('splitHint').textContent = activeTab==='recurring' ? '(fixed for this bill each month)' : '';
+  $('partChips').innerHTML=config.people.map(p=>{
+    const on=chipState[p.name];
+    return `<div class="chip ${on?'on':'off'}" data-name="${esc(p.name)}">
+      <span class="cdot" style="background:${p.color}"></span>${esc(p.name)}</div>`;
+  }).join('');
+}
+$('partChips').addEventListener('click',e=>{
+  const chip=e.target.closest('.chip');if(!chip)return;
+  const n=chip.dataset.name;chipState[n]=!chipState[n];renderChips();
+});
+
+/* ---------------- TABS ---------------- */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    activeTab=t.dataset.tab;
+    $('householdTab').classList.toggle('hidden',activeTab!=='household');
+    $('recurringTab').classList.toggle('hidden',activeTab==='recurring'?false:true);
+    // adjust add form placeholder + hint
+    $('fItem').placeholder = activeTab==='recurring' ? 'Bill (e.g. Wifi)' : 'Item (e.g. Dining table)';
+    $('addBtn').textContent = activeTab==='recurring' ? 'Add bill' : 'Add';
+    renderChips();
+  };
+});
+
+/* ---------------- SETTLEMENT MATH ---------------- */
+// An item owes a share only to its participants; payer may or may not be a participant.
+// Recurring bill counts as "due" (unsettled) when its paidMonth !== current month.
+function activeItems(){
+  const one=ledger.filter(i=>!i.settled).map(i=>({...i,_src:'ledger'}));
+  const rec=recurring.filter(b=>b.paidMonth!==monthKey())
+                     .map(b=>({...b,_src:'recurring'}));
+  return one.concat(rec);
+}
+function computeNets(){
+  const nets={};config.people.forEach(p=>nets[p.name]=0);
+  activeItems().forEach(it=>{
+    const parts=(it.participants||[]).filter(n=>nets.hasOwnProperty(n));
+    if(!parts.length)return;
+    const share=it.price/parts.length;
+    if(nets.hasOwnProperty(it.who)) nets[it.who]+=it.price; // fronted
+    parts.forEach(n=>nets[n]-=share);                        // owes share
+  });
+  return nets; // positive = owed money, negative = owes
+}
+// greedy minimal settle-up
+function settleUp(nets){
+  const cred=[],deb=[];
+  Object.entries(nets).forEach(([n,v])=>{
+    if(v>0.005)cred.push({n,v});else if(v<-0.005)deb.push({n,v:-v});
+  });
+  cred.sort((a,b)=>b.v-a.v);deb.sort((a,b)=>b.v-a.v);
+  const pays=[];let ci=0,di=0;
+  while(ci<cred.length&&di<deb.length){
+    const amt=Math.min(cred[ci].v,deb[di].v);
+    pays.push({from:deb[di].n,to:cred[ci].n,amt});
+    cred[ci].v-=amt;deb[di].v-=amt;
+    if(cred[ci].v<0.005)ci++;if(deb[di].v<0.005)di++;
+  }
+  return pays;
+}
+
+function renderSettlement(){
+  const nets=computeNets();
+  const st=$('standings');
+  st.innerHTML=config.people.map(p=>{
+    const v=nets[p.name]||0;
+    const cls=v>0.005?'pos':v<-0.005?'neg':'';
+    const txt=Math.abs(v)<0.005?'even':(v>0?'+'+money(v):'−'+money(-v));
+    return `<div class="standing"><span class="dot" style="background:${p.color}"></span>
+      <span class="name">${esc(p.name)}</span><span class="amt ${cls}">${txt}</span></div>`;
+  }).join('');
+  const pays=settleUp(nets);
+  const sl=$('settleList');
+  if(!pays.length){
+    sl.innerHTML=`<div class="all-square">All square</div>`;
+  }else{
+    sl.innerHTML=`<div class="h">To settle up</div>`+pays.map(p=>
+      `<div class="pay">${esc(p.from)}<span class="arrow">pays</span>${esc(p.to)}
+       <span class="amt">${money(p.amt)}</span></div>`).join('');
+  }
+}
+
+/* ---------------- ROW RENDERING ---------------- */
+function partsLabel(it){
+  const parts=it.participants||[];
+  if(parts.length===config.people.length)return 'split evenly';
+  return 'split: '+parts.join(', ');
+}
+function ledgerRow(i){
+  return `<div class="row ${i.settled?'settled':''}" data-id="${i.id}" data-src="ledger">
+    <span class="who-tag" style="background:${colorOf(i.who)}"></span>
+    <div class="item">${esc(i.item)}
+      ${i.note?`<span class="note">${esc(i.note)}</span>`:''}
+      <span class="parts">${esc(partsLabel(i))}</span></div>
+    <div class="who" style="color:${colorOf(i.who)}">${esc(i.who)} paid</div>
+    <div class="price">${money(i.price)}</div>
+    <div class="actions">
+      ${i.settled
+        ? `<button class="icon" data-act="unsettle" title="Reopen">↩</button>`
+        : `<button class="icon done" data-act="settle" title="Mark paid back">✓</button>`}
+      <button class="icon" data-act="delete" title="Delete">✕</button>
+    </div></div>`;
+}
+function recurringRow(b){
+  const due=b.paidMonth!==monthKey();
+  return `<div class="row ${due?'due':'settled'}" data-id="${b.id}" data-src="recurring">
+    <span class="who-tag" style="background:${colorOf(b.who)}"></span>
+    <div class="item">${esc(b.item)}
+      ${b.note?`<span class="note">${esc(b.note)}</span>`:''}
+      <span class="parts">${esc(partsLabel(b))} · ${due?'due for '+monthKey():'paid for '+monthKey()}</span></div>
+    <div class="who" style="color:${colorOf(b.who)}">${esc(b.who)} pays</div>
+    <div class="price">${money(b.price)}</div>
+    <div class="actions">
+      ${due
+        ? `<button class="icon done" data-act="paymonth" title="Mark paid this month">✓</button>`
+        : `<button class="icon" data-act="unpaymonth" title="Undo this month">↩</button>`}
+      <button class="icon" data-act="delrec" title="Delete bill">✕</button>
+    </div></div>`;
+}
+
+function render(){
+  renderSettlement();
+  const open=ledger.filter(i=>!i.settled);
+  const settled=ledger.filter(i=>i.settled);
+  $('openLedger').innerHTML=open.length?open.map(ledgerRow).join(''):`<div class="empty">No open items. Add one above.</div>`;
+  $('settledLedger').innerHTML=settled.map(ledgerRow).join('');
+  $('settledLabel').style.display=settled.length?'flex':'none';
+  $('recurringLedger').innerHTML=recurring.length?recurring.map(recurringRow).join(''):`<div class="empty">No standing bills yet. Add one above.</div>`;
+}
+
+/* ---------------- ADD ---------------- */
+$('addBtn').onclick=async()=>{
+  const item=$('fItem').value.trim();
+  const price=parseFloat($('fPrice').value);
+  const who=$('fWho').value;
+  const note=$('fNote').value.trim();
+  const participants=config.people.map(p=>p.name).filter(n=>chipState[n]);
+  if(!item){$('fItem').focus();return;}
+  if(isNaN(price)){$('fPrice').focus();return;}
+  if(!participants.length){alert('Pick at least one person to split among.');return;}
+  setStatus('Saving…','warn');
+  if(activeTab==='recurring'){
+    const bill={id:Date.now(),item,price,who,note,participants,paidMonth:''};
+    recurring.push(bill);render();
+    clearForm();
+    try{await api('POST',{action:'addRecurring',item:bill});setStatus('Connected','ok');}
+    catch(e){setStatus('Save failed — refresh','err');}
+  }else{
+    const it={id:Date.now(),item,price,who,note,participants,settled:false};
+    ledger.push(it);render();
+    clearForm();
+    try{await api('POST',{action:'add',item:it});setStatus('Connected','ok');}
+    catch(e){setStatus('Save failed — refresh','err');}
+  }
+};
+function clearForm(){
+  $('fItem').value='';$('fPrice').value='';$('fNote').value='';$('fItem').focus();
+  buildChips(); // reset chips to all-on
+}
+
+/* ---------------- ROW ACTIONS ---------------- */
+$('mainApp').addEventListener('click',async e=>{
+  const btn=e.target.closest('[data-act]');if(!btn)return;
+  const rowEl=btn.closest('.row');const id=rowEl.dataset.id;const act=btn.dataset.act;
+  setStatus('Saving…','warn');
+  try{
+    if(act==='settle'||act==='unsettle'){
+      const it=ledger.find(x=>String(x.id)===String(id));
+      it.settled=(act==='settle');render();
+      await api('POST',{action:'update',id,settled:it.settled});
+    }else if(act==='delete'){
+      ledger=ledger.filter(x=>String(x.id)!==String(id));render();
+      await api('POST',{action:'delete',id});
+    }else if(act==='paymonth'||act==='unpaymonth'){
+      const b=recurring.find(x=>String(x.id)===String(id));
+      b.paidMonth=(act==='paymonth')?monthKey():'';render();
+      await api('POST',{action:'payRecurring',id,paidMonth:b.paidMonth});
+    }else if(act==='delrec'){
+      recurring=recurring.filter(x=>String(x.id)!==String(id));render();
+      await api('POST',{action:'deleteRecurring',id});
+    }
+    setStatus('Connected','ok');
+  }catch(err){setStatus('Save failed — refresh','err');}
+});
+
+/* ---------------- SETTLE ALL ---------------- */
+$('settleAll').onclick=async()=>{
+  const openLedger=ledger.filter(i=>!i.settled);
+  const dueRec=recurring.filter(b=>b.paidMonth!==monthKey());
+  const total=openLedger.length+dueRec.length;
+  if(!total)return;
+  if(!confirm(`Mark all ${total} open items settled? (Ledger items settle; this month's recurring bills mark paid.)`))return;
+  ledger.forEach(i=>i.settled=true);
+  recurring.forEach(b=>b.paidMonth=monthKey());
+  render();
+  setStatus('Saving…','warn');
+  try{await api('POST',{action:'settleAll',month:monthKey()});setStatus('Connected','ok');}
+  catch(e){setStatus('Save failed — refresh','err');}
+};
+
+/* ---------------- RESET ---------------- */
+$('resetHousehold').onclick=async()=>{
+  if(!confirm('Reset the household roster? This clears the people list (expenses stay). You will re-enter names.'))return;
+  try{await api('POST',{action:'resetConfig'});config=null;setupCount=2;showSetup();}
+  catch(e){setStatus('Reset failed','err');}
+};
+
+$('refreshBtn').onclick=loadData;
+['fItem','fPrice','fNote'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')$('addBtn').click();}));
+
+$('connectBtn').onclick=async()=>{
+  const url=$('urlInput').value.trim();
+  if(!url.endsWith('/exec')){setStatus('URL should end in /exec','err');return;}
+  API=url;localStorage.setItem(URL_KEY,url);await loadData();
+};
+
+/* ---------------- BOOT ---------------- */
+(function(){
+  const saved=localStorage.getItem(URL_KEY);
+  if(saved){$('urlInput').value=saved;API=saved;loadData();}
+})();
+</script>
+</body>
+</html>
