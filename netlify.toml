@@ -1,0 +1,14 @@
+# Netlify build config.
+#
+# There is no build step in the usual sense — the app is static files. The one
+# thing that has to happen at deploy time is writing config.js, because it is
+# gitignored (it holds your Supabase keys) and so never arrives from the repo.
+#
+# Set SUPABASE_URL and SUPABASE_ANON_KEY in:
+#   Site configuration > Environment variables
+#
+# Both are safe to expose in the browser; see SETUP.md for what that means.
+
+[build]
+  publish = "."
+  command = '''printf "window.APP_CONFIG={SUPABASE_URL:'%s',SUPABASE_ANON_KEY:'%s'};" "$SUPABASE_URL" "$SUPABASE_ANON_KEY" > config.js'''
