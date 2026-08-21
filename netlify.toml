@@ -8,7 +8,12 @@
 #   Site configuration > Environment variables
 #
 # Both are safe to expose in the browser; see SETUP.md for what that means.
-
 [build]
-  publish = "."
-  command = '''printf "window.APP_CONFIG={SUPABASE_URL:'%s',SUPABASE_ANON_KEY:'%s'};" "$SUPABASE_URL" "$SUPABASE_ANON_KEY" > config.js'''
+  command = "printf \"window.APP_CONFIG={SUPABASE_URL:'%s',SUPABASE_ANON_KEY:'%s'};\" \"$SUPABASE_URL\" \"$SUPABASE_ANON_KEY\" > config.js"
+
+[context.production.environment]
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_ANON_KEY,SUPABASE_URL"
+
+#[build]
+ # publish = "."
+  #command = '''printf "window.APP_CONFIG={SUPABASE_URL:'%s',SUPABASE_ANON_KEY:'%s'};" "$SUPABASE_URL" "$SUPABASE_ANON_KEY" > config.js'''
