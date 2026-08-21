@@ -23,9 +23,7 @@
 
   .card{border:1px solid var(--line);border-radius:2px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
   .conn{margin:18px 0 0;padding:14px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-  .conn input{flex:1;min-width:220px;font-family:'JetBrains Mono',monospace;font-size:12px;
-    padding:9px 11px;border:1px solid var(--line);border-radius:2px;color:var(--ink);}
-  .conn input:focus{outline:none;border-color:var(--accent);}
+  .conn #connDetail{margin-left:auto;text-align:right;word-break:break-all;}
   .btn-dark{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
     background:var(--ink);color:var(--paper);border:none;padding:10px 14px;border-radius:2px;cursor:pointer;transition:.15s;}
   .btn-dark:hover{background:var(--accent);} .btn-dark:disabled{opacity:.4;cursor:not-allowed;}
@@ -75,6 +73,7 @@
   .pay .amt{color:var(--accent);}
   .pay .arrow{color:var(--muted);margin:0 8px;font-family:'Inter';font-size:15px;}
   .all-square{font-family:'Fraunces',serif;font-size:24px;color:var(--green);}
+  .settle-actions{display:flex;gap:10px;flex-wrap:wrap;}
   .settle-btn{margin-top:16px;background:none;border:1px solid var(--line);color:var(--muted);
     font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
     padding:9px 14px;border-radius:2px;cursor:pointer;transition:.15s;}
@@ -87,6 +86,15 @@
     border-radius:2px;background:#fff;color:var(--ink);width:100%;}
   .add input:focus,.add select:focus{outline:none;border-color:var(--accent);}
   .add .btn-dark{padding:12px 18px;white-space:nowrap;}
+  .money-field{position:relative;display:block;}
+  .money-field .money-sign{position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    color:var(--muted);font-size:14px;pointer-events:none;}
+  .add .money-field input{padding-left:26px;}
+  /* the spinner's tiny arrows invite exactly the stepping we don't want */
+  .add .money-field input::-webkit-outer-spin-button,
+  .add .money-field input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .add .money-field input{-moz-appearance:textfield;appearance:textfield;}
+
   .participants{margin-top:14px;}
   .participants .plabel{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;
     text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
@@ -127,6 +135,59 @@
     font-size:10px;letter-spacing:.08em;text-transform:uppercase;text-decoration:underline;}
   .cornerlink:hover{color:var(--accent);}
   .hidden{display:none!important;}
+
+  /* ---- Transaction history report ---- */
+  .report{margin:24px 0;padding:34px 38px;}
+  .report-actions{display:flex;gap:10px;align-items:center;margin-bottom:30px;}
+  .rdoc{max-width:660px;}
+  .rtitle{font-family:'Fraunces',serif;font-weight:500;font-size:28px;letter-spacing:-.01em;}
+  .rmeta{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);margin-top:6px;}
+  .rsec{margin-top:30px;}
+  .rsec > .h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted);padding-bottom:8px;
+    border-bottom:1px solid var(--line-strong,#d3cdcd);margin-bottom:2px;
+    display:grid;grid-template-columns:96px 1fr 120px 92px;gap:14px;}
+  .rsec > .h span:last-child{text-align:right;}
+  .ritem{display:grid;grid-template-columns:96px 1fr 120px 92px;gap:14px;
+    padding:10px 0;border-bottom:1px solid var(--line);align-items:baseline;}
+  .ritem .dt{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);
+    font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .ritem .nm{font-size:14.5px;}
+  .ritem .nm .nt{display:block;font-size:12px;color:var(--muted);margin-top:2px;}
+  .ritem .by{font-size:13px;display:flex;align-items:center;gap:7px;min-width:0;}
+  .ritem .by .dot{width:8px;height:8px;border-radius:50%;flex:none;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .ritem .amt{font-variant-numeric:tabular-nums;font-weight:600;font-size:14.5px;text-align:right;}
+  .rtotal{display:grid;grid-template-columns:96px 1fr 120px 92px;gap:14px;
+    padding:13px 0 0;font-size:14px;font-weight:600;}
+  .rtotal span:first-child{grid-column:1/4;font-family:'JetBrains Mono',monospace;
+    font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+  .rtotal .amt{text-align:right;font-variant-numeric:tabular-nums;}
+  .rempty{padding:26px 0;color:var(--muted);font-size:14px;}
+  .rfoot{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--muted);}
+
+  @media(max-width:680px){
+    .report{padding:24px 20px;}
+    .rsec > .h{display:none;}
+    .ritem,.rtotal{grid-template-columns:1fr auto;gap:4px 12px;}
+    .ritem .dt{grid-column:1/-1;order:-1;}
+    .ritem .by{grid-column:1/2;}
+    .ritem .amt{grid-row:2;}
+    .rtotal span:first-child{grid-column:1/2;}
+  }
+
+  @media print{
+    body{padding:0;background:#fff;}
+    .conn,.report-actions,.tabs{display:none!important;}
+    .card{border:none!important;box-shadow:none!important;}
+    .report{margin:0;padding:0;}
+    .rdoc{max-width:none;}
+    h1{font-size:32px;}
+    .ritem{break-inside:avoid;}
+    .rsec > .h{display:grid!important;}
+  }
   .monthnote{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin:0 0 6px;}
 
   @media(max-width:680px){
@@ -144,15 +205,14 @@
   </header>
 
   <div class="conn card">
-    <input id="urlInput" placeholder="Paste your Apps Script Web app URL (…/exec)" />
-    <button class="btn-dark" id="connectBtn">Connect</button>
-    <span class="status" id="status">Not connected</span>
+    <span class="status" id="status">Connecting…</span>
+    <span class="tiny" id="connDetail"></span>
   </div>
 
   <!-- ============ SETUP SCREEN ============ -->
   <div class="setup card hidden" id="setupScreen">
     <h2>Set up your household</h2>
-    <p>Enter everyone who shares expenses. You can do this once — it saves to the sheet for everyone.</p>
+    <p>Enter everyone who shares expenses. You can do this once — it saves for everyone.</p>
     <label>How many people?</label>
     <div class="count-row">
       <button id="decBtn">–</button>
@@ -170,7 +230,10 @@
       <div class="lbl">Settlement · all unsettled items, both tabs</div>
       <div class="standings" id="standings"></div>
       <div class="settle-list" id="settleList"></div>
-      <button class="settle-btn" id="settleAll">Settle all open items</button>
+      <div class="settle-actions">
+        <button class="settle-btn" id="settleAll">Settle all open items</button>
+        <button class="settle-btn" id="exportReport">Export report</button>
+      </div>
     </div>
 
     <div class="tabs">
@@ -182,7 +245,10 @@
     <div class="add card">
       <div class="fields">
         <input id="fItem" placeholder="Item (e.g. Dining table)" />
-        <input id="fPrice" type="number" step="0.01" placeholder="Price" />
+        <div class="money-field">
+          <span class="money-sign" aria-hidden="true">$</span>
+          <input id="fPrice" type="number" step="0.01" min="0" inputmode="decimal" placeholder="0.00" />
+        </div>
         <select id="fWho"></select>
         <input id="fNote" placeholder="Note (optional)" />
         <button class="btn-dark" id="addBtn">Add</button>
@@ -212,56 +278,125 @@
       <button class="cornerlink" id="resetHousehold">Reset household</button>
     </div>
   </div>
+
+  <!-- ============ SETTLEMENT REPORT ============ -->
+  <div id="reportView" class="report card hidden">
+    <div class="report-actions">
+      <button class="btn-dark" id="printReport">Print / Save PDF</button>
+      <button class="cornerlink" id="closeReport">Back to app</button>
+    </div>
+    <div class="rdoc" id="reportDoc"></div>
+  </div>
 </div>
 
-<script>
-const URL_KEY='house_finance_apps_script_url';
-let API='';
+<script src="config.js"></script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+/* ---------------- STATE ---------------- */
+let sb=null;
 let config=null;           // {people:[{name,color}]}
-let ledger=[];             // one-time items
-let recurring=[];          // standing bills
+let ledger=[];             // one-time items   {id,item,priceCents,who,note,participants,settled}
+let recurring=[];          // standing bills   {id,item,priceCents,who,note,participants,paidMonth}
 let activeTab='household';
 let setupCount=2;
 
 // palette assigned to people in order
-const PALETTE=['#dc2626','#2563eb','#16a34a','#d97706','#7c3aed','#db2777','#0891b2','#65a30d'];
+const PALETTE=['#f8a5a5','#a5c3f8','#a5e0b8','#f8d9a5','#c9b3f0','#f5b8d6','#a5dae0','#cbe89a'];
 
-const money=n=>'$'+n.toFixed(2);
+/* ---------------- HELPERS ---------------- */
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const setStatus=(m,c)=>{const s=$('status');s.textContent=m;s.className='status '+(c||'');};
 const colorOf=name=>{const p=config?.people.find(x=>x.name===name);return p?p.color:'#999';};
 const monthKey=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');};
 
-async function api(method,body){
-  if(!API) throw new Error('no url');
-  const opts={method,redirect:'follow'};
-  if(method==='POST'){
-    // text/plain avoids a CORS preflight against Apps Script
-    opts.headers={'Content-Type':'text/plain;charset=utf-8'};
-    opts.body=JSON.stringify(body);
-  }
-  const r=await fetch(API,opts);
-  return r.json();
+// Money lives in integer cents everywhere; dollars exist only at the edges.
+const money=cents=>'$'+(cents/100).toFixed(2);
+const toCents=dollars=>Math.round(dollars*100);
+
+// Ids are client-generated so an optimistic row already has its final id.
+// Microsecond-scale keeps them well clear of the legacy Date.now() ids the
+// Sheets importer writes (~1.7e12 vs ~1.7e15) and inside Number.MAX_SAFE_INTEGER.
+const newId=()=>Date.now()*1000+Math.floor(Math.random()*1000);
+
+// Split `total` cents `n` ways with the remainder handed out one cent at a
+// time, so the shares always add back up to exactly `total`.
+function shares(total,n){
+  const base=Math.floor(total/n), rem=total-base*n, out=[];
+  for(let i=0;i<n;i++) out.push(i<rem?base+1:base);
+  return out;
 }
 
+const rowToLedger=r=>({id:Number(r.id),item:r.item,priceCents:r.price_cents,who:r.who,
+  note:r.note||'',participants:r.participants||[],settled:!!r.settled,createdAt:r.created_at});
+const rowToRecurring=r=>({id:Number(r.id),item:r.item,priceCents:r.price_cents,who:r.who,
+  note:r.note||'',participants:r.participants||[],paidMonth:r.paid_month||'',createdAt:r.created_at});
+
+// 'Aug 21, 2026'. Optimistic rows carry a local timestamp until the server's
+// created_at arrives on the next refetch; both parse the same way.
+const entryDate=iso=>{
+  if(!iso)return '—';
+  const d=new Date(iso);
+  return isNaN(d)?'—':d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+};
+
+/* ---------------- CONNECT ---------------- */
+function connect(){
+  const cfg=window.APP_CONFIG||{};
+  if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY||cfg.SUPABASE_URL.includes('YOUR-PROJECT-REF')){
+    setStatus('No Supabase config','err');
+    $('connDetail').textContent='Copy config.example.js to config.js and paste in your project URL and anon key.';
+    return false;
+  }
+  sb=createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+  $('connDetail').textContent=cfg.SUPABASE_URL.replace(/^https?:\/\//,'');
+  return true;
+}
+
+/* ---------------- LOAD ---------------- */
 async function loadData(){
+  if(!sb)return;
+  setStatus('Loading…','warn');
   try{
-    setStatus('Loading…','warn');
-    const data=await api('GET');
-    config=data.config&&data.config.people&&data.config.people.length?data.config:null;
-    ledger=data.ledger||[];
-    recurring=data.recurring||[];
-    if(!config){ showSetup(); }
-    else { showApp(); }
+    const [pRes,lRes,rRes]=await Promise.all([
+      sb.from('people').select('*').order('position'),
+      sb.from('ledger').select('*').order('created_at'),
+      sb.from('recurring').select('*').order('created_at')
+    ]);
+    for(const res of [pRes,lRes,rRes]) if(res.error) throw res.error;
+    const people=pRes.data.map(p=>({name:p.name,color:p.color}));
+    config=people.length?{people}:null;
+    ledger=lRes.data.map(rowToLedger);
+    recurring=rRes.data.map(rowToRecurring);
+    if(!config) showSetup(); else showApp();
     setStatus('Connected','ok');
-  }catch(e){ setStatus('Could not reach sheet','err'); }
+  }catch(e){
+    console.error(e);
+    setStatus('Could not reach Supabase','err');
+  }
+}
+
+// Realtime refetches are coalesced: a burst of row events costs one round trip.
+let refetchTimer=null;
+function scheduleRefetch(){
+  clearTimeout(refetchTimer);
+  refetchTimer=setTimeout(loadData,150);
+}
+
+function subscribeRealtime(){
+  sb.channel('tabs')
+    .on('postgres_changes',{event:'*',schema:'public',table:'people'},scheduleRefetch)
+    .on('postgres_changes',{event:'*',schema:'public',table:'ledger'},scheduleRefetch)
+    .on('postgres_changes',{event:'*',schema:'public',table:'recurring'},scheduleRefetch)
+    .subscribe();
 }
 
 /* ---------------- SETUP ---------------- */
 function showSetup(){
   $('setupScreen').classList.remove('hidden');
   $('mainApp').classList.add('hidden');
+  $('householdName').textContent='House Finance';
   renderNameInputs();
 }
 function renderNameInputs(){
@@ -283,13 +418,15 @@ $('saveSetup').onclick=async()=>{
   const names=[...$('nameInputs').querySelectorAll('input')].map(i=>i.value.trim()).filter(Boolean);
   if(names.length<2){alert('Enter at least two names.');return;}
   if(new Set(names).size!==names.length){alert('Names must be unique.');return;}
-  config={people:names.map((name,i)=>({name,color:PALETTE[i%PALETTE.length]}))};
   setStatus('Saving…','warn');
   try{
-    await api('POST',{action:'saveConfig',config});
+    const rows=names.map((name,i)=>({name,color:PALETTE[i%PALETTE.length],position:i}));
+    const del=await sb.from('people').delete().gte('id',0); if(del.error) throw del.error;
+    const ins=await sb.from('people').insert(rows);         if(ins.error) throw ins.error;
+    config={people:rows.map(({name,color})=>({name,color}))};
     showApp();
     setStatus('Connected','ok');
-  }catch(e){setStatus('Save failed','err');}
+  }catch(e){console.error(e);setStatus('Save failed','err');}
 };
 
 /* ---------------- MAIN APP SHELL ---------------- */
@@ -299,16 +436,26 @@ function showApp(){
   const names=config.people.map(p=>p.name);
   $('householdName').textContent=names.join(' · ');
   document.querySelector('h1').textContent='House Finance';
-  // payer dropdown
+  // payer dropdown — keep the current pick if that person is still on the roster
+  const prevWho=$('fWho').value;
   $('fWho').innerHTML=config.people.map(p=>`<option value="${esc(p.name)}">${esc(p.name)} paid</option>`).join('');
+  if(names.includes(prevWho))$('fWho').value=prevWho;
   $('monthNote').textContent='This month: '+monthKey()+'. Bills marked paid reset automatically next month.';
-  buildChips();
+  syncChips();
   render();
 }
 
-/* participant chips — default all ON */
-let chipState={}; // name -> bool
-function buildChips(){
+/* participant chips — default all ON.
+   syncChips only adds/removes names, so a realtime refetch never silently
+   flips a chip the user just turned off mid-entry. */
+let chipState={};
+function syncChips(){
+  const next={};
+  config.people.forEach(p=>next[p.name]=chipState.hasOwnProperty(p.name)?chipState[p.name]:true);
+  chipState=next;
+  renderChips();
+}
+function resetChips(){
   chipState={};
   config.people.forEach(p=>chipState[p.name]=true);
   renderChips();
@@ -333,8 +480,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     t.classList.add('active');
     activeTab=t.dataset.tab;
     $('householdTab').classList.toggle('hidden',activeTab!=='household');
-    $('recurringTab').classList.toggle('hidden',activeTab==='recurring'?false:true);
-    // adjust add form placeholder + hint
+    $('recurringTab').classList.toggle('hidden',activeTab!=='recurring');
     $('fItem').placeholder = activeTab==='recurring' ? 'Bill (e.g. Wifi)' : 'Item (e.g. Dining table)';
     $('addBtn').textContent = activeTab==='recurring' ? 'Add bill' : 'Add';
     renderChips();
@@ -342,12 +488,11 @@ document.querySelectorAll('.tab').forEach(t=>{
 });
 
 /* ---------------- SETTLEMENT MATH ---------------- */
-// An item owes a share only to its participants; payer may or may not be a participant.
-// Recurring bill counts as "due" (unsettled) when its paidMonth !== current month.
+// An item owes a share only to its participants; payer may or may not be one.
+// A recurring bill counts as due (unsettled) when its paidMonth !== this month.
 function activeItems(){
-  const one=ledger.filter(i=>!i.settled).map(i=>({...i,_src:'ledger'}));
-  const rec=recurring.filter(b=>b.paidMonth!==monthKey())
-                     .map(b=>({...b,_src:'recurring'}));
+  const one=ledger.filter(i=>!i.settled);
+  const rec=recurring.filter(b=>b.paidMonth!==monthKey());
   return one.concat(rec);
 }
 function computeNets(){
@@ -355,17 +500,17 @@ function computeNets(){
   activeItems().forEach(it=>{
     const parts=(it.participants||[]).filter(n=>nets.hasOwnProperty(n));
     if(!parts.length)return;
-    const share=it.price/parts.length;
-    if(nets.hasOwnProperty(it.who)) nets[it.who]+=it.price; // fronted
-    parts.forEach(n=>nets[n]-=share);                        // owes share
+    const cut=shares(it.priceCents,parts.length);
+    if(nets.hasOwnProperty(it.who)) nets[it.who]+=it.priceCents;  // fronted
+    parts.forEach((n,i)=>nets[n]-=cut[i]);                        // owes share
   });
-  return nets; // positive = owed money, negative = owes
+  return nets; // positive = owed money, negative = owes. Cents.
 }
 // greedy minimal settle-up
 function settleUp(nets){
   const cred=[],deb=[];
   Object.entries(nets).forEach(([n,v])=>{
-    if(v>0.005)cred.push({n,v});else if(v<-0.005)deb.push({n,v:-v});
+    if(v>0)cred.push({n,v});else if(v<0)deb.push({n,v:-v});
   });
   cred.sort((a,b)=>b.v-a.v);deb.sort((a,b)=>b.v-a.v);
   const pays=[];let ci=0,di=0;
@@ -373,18 +518,17 @@ function settleUp(nets){
     const amt=Math.min(cred[ci].v,deb[di].v);
     pays.push({from:deb[di].n,to:cred[ci].n,amt});
     cred[ci].v-=amt;deb[di].v-=amt;
-    if(cred[ci].v<0.005)ci++;if(deb[di].v<0.005)di++;
+    if(cred[ci].v===0)ci++;if(deb[di].v===0)di++;
   }
   return pays;
 }
 
 function renderSettlement(){
   const nets=computeNets();
-  const st=$('standings');
-  st.innerHTML=config.people.map(p=>{
+  $('standings').innerHTML=config.people.map(p=>{
     const v=nets[p.name]||0;
-    const cls=v>0.005?'pos':v<-0.005?'neg':'';
-    const txt=Math.abs(v)<0.005?'even':(v>0?'+'+money(v):'−'+money(-v));
+    const cls=v>0?'pos':v<0?'neg':'';
+    const txt=v===0?'even':(v>0?'+'+money(v):'−'+money(-v));
     return `<div class="standing"><span class="dot" style="background:${p.color}"></span>
       <span class="name">${esc(p.name)}</span><span class="amt ${cls}">${txt}</span></div>`;
   }).join('');
@@ -399,6 +543,66 @@ function renderSettlement(){
   }
 }
 
+/* ---------------- TRANSACTION HISTORY ---------------- */
+// A plain record of what was bought, who paid for it, and when it was entered.
+// Deliberately not a settlement view: no balances, no settled/unsettled state.
+function renderReport(){
+  const generated=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+
+  // Newest first. created_at is the entry date; ids are time-ordered, so they
+  // break ties for rows entered in the same instant.
+  const history=[...ledger].sort((a,b)=>
+    (Date.parse(b.createdAt||0)-Date.parse(a.createdAt||0))||(b.id-a.id));
+
+  const rows=history.length
+    ? history.map(i=>`<div class="ritem">
+        <span class="dt">${esc(entryDate(i.createdAt))}</span>
+        <span class="nm">${esc(i.item)}${i.note?`<span class="nt">${esc(i.note)}</span>`:''}</span>
+        <span class="by"><span class="dot" style="background:${colorOf(i.who)}"></span>${esc(i.who)}</span>
+        <span class="amt">${money(i.priceCents)}</span>
+      </div>`).join('')
+    : `<div class="rempty">No expenses recorded yet.</div>`;
+
+  const total=ledger.reduce((a,i)=>a+i.priceCents,0);
+  const totalRow=history.length
+    ? `<div class="rtotal"><span>${history.length} ${history.length===1?'entry':'entries'}</span>
+        <span class="amt">${money(total)}</span></div>`
+    : '';
+
+  const bills=recurring.length
+    ? `<div class="rsec"><div class="h">Standing bills</div>` + [...recurring]
+        .sort((a,b)=>(Date.parse(a.createdAt||0)-Date.parse(b.createdAt||0))||(a.id-b.id))
+        .map(b=>`<div class="ritem">
+          <span class="dt">${esc(entryDate(b.createdAt))}</span>
+          <span class="nm">${esc(b.item)}${b.note?`<span class="nt">${esc(b.note)}</span>`:''}</span>
+          <span class="by"><span class="dot" style="background:${colorOf(b.who)}"></span>${esc(b.who)}</span>
+          <span class="amt">${money(b.priceCents)}</span>
+        </div>`).join('') + `</div>`
+    : '';
+
+  $('reportDoc').innerHTML=`
+    <div class="rtitle">Transaction history</div>
+    <div class="rmeta">${esc(config.people.map(p=>p.name).join(' · '))} · generated ${esc(generated)}</div>
+    <div class="rsec"><div class="h">
+      <span>Date</span><span>Item</span><span>Paid by</span><span>Amount</span>
+    </div>${rows}${totalRow}</div>
+    ${bills}
+    <div class="rfoot">Every expense on record, newest first. Dates are when the
+      entry was added.</div>`;
+}
+
+$('exportReport').onclick=()=>{
+  renderReport();
+  $('mainApp').classList.add('hidden');
+  $('reportView').classList.remove('hidden');
+  window.scrollTo(0,0);
+};
+$('closeReport').onclick=()=>{
+  $('reportView').classList.add('hidden');
+  $('mainApp').classList.remove('hidden');
+};
+$('printReport').onclick=()=>window.print();
+
 /* ---------------- ROW RENDERING ---------------- */
 function partsLabel(it){
   const parts=it.participants||[];
@@ -412,7 +616,7 @@ function ledgerRow(i){
       ${i.note?`<span class="note">${esc(i.note)}</span>`:''}
       <span class="parts">${esc(partsLabel(i))}</span></div>
     <div class="who" style="color:${colorOf(i.who)}">${esc(i.who)} paid</div>
-    <div class="price">${money(i.price)}</div>
+    <div class="price">${money(i.priceCents)}</div>
     <div class="actions">
       ${i.settled
         ? `<button class="icon" data-act="unsettle" title="Reopen">↩</button>`
@@ -428,7 +632,7 @@ function recurringRow(b){
       ${b.note?`<span class="note">${esc(b.note)}</span>`:''}
       <span class="parts">${esc(partsLabel(b))} · ${due?'due for '+monthKey():'paid for '+monthKey()}</span></div>
     <div class="who" style="color:${colorOf(b.who)}">${esc(b.who)} pays</div>
-    <div class="price">${money(b.price)}</div>
+    <div class="price">${money(b.priceCents)}</div>
     <div class="actions">
       ${due
         ? `<button class="icon done" data-act="paymonth" title="Mark paid this month">✓</button>`
@@ -439,6 +643,7 @@ function recurringRow(b){
 
 function render(){
   renderSettlement();
+  if(!$('reportView').classList.contains('hidden')) renderReport();
   const open=ledger.filter(i=>!i.settled);
   const settled=ledger.filter(i=>i.settled);
   $('openLedger').innerHTML=open.length?open.map(ledgerRow).join(''):`<div class="empty">No open items. Add one above.</div>`;
@@ -456,88 +661,115 @@ $('addBtn').onclick=async()=>{
   const participants=config.people.map(p=>p.name).filter(n=>chipState[n]);
   if(!item){$('fItem').focus();return;}
   if(isNaN(price)){$('fPrice').focus();return;}
+  if(price<0){alert('Price cannot be negative.');$('fPrice').focus();return;}
   if(!participants.length){alert('Pick at least one person to split among.');return;}
+  const priceCents=toCents(price);
+  const id=newId();
   setStatus('Saving…','warn');
   if(activeTab==='recurring'){
-    const bill={id:Date.now(),item,price,who,note,participants,paidMonth:''};
-    recurring.push(bill);render();
-    clearForm();
-    try{await api('POST',{action:'addRecurring',item:bill});setStatus('Connected','ok');}
-    catch(e){setStatus('Save failed — refresh','err');}
+    const bill={id,item,priceCents,who,note,participants,paidMonth:'',createdAt:new Date().toISOString()};
+    recurring.push(bill);render();clearForm();
+    try{
+      const {error}=await sb.from('recurring').insert({id,item,price_cents:priceCents,who,note,participants,paid_month:''});
+      if(error)throw error;
+      setStatus('Connected','ok');
+    }catch(e){console.error(e);setStatus('Save failed — refresh','err');}
   }else{
-    const it={id:Date.now(),item,price,who,note,participants,settled:false};
-    ledger.push(it);render();
-    clearForm();
-    try{await api('POST',{action:'add',item:it});setStatus('Connected','ok');}
-    catch(e){setStatus('Save failed — refresh','err');}
+    const it={id,item,priceCents,who,note,participants,settled:false,createdAt:new Date().toISOString()};
+    ledger.push(it);render();clearForm();
+    try{
+      const {error}=await sb.from('ledger').insert({id,item,price_cents:priceCents,who,note,participants,settled:false});
+      if(error)throw error;
+      setStatus('Connected','ok');
+    }catch(e){console.error(e);setStatus('Save failed — refresh','err');}
   }
 };
 function clearForm(){
   $('fItem').value='';$('fPrice').value='';$('fNote').value='';$('fItem').focus();
-  buildChips(); // reset chips to all-on
+  resetChips();
 }
 
 /* ---------------- ROW ACTIONS ---------------- */
 $('mainApp').addEventListener('click',async e=>{
   const btn=e.target.closest('[data-act]');if(!btn)return;
-  const rowEl=btn.closest('.row');const id=rowEl.dataset.id;const act=btn.dataset.act;
+  const rowEl=btn.closest('.row');const id=Number(rowEl.dataset.id);const act=btn.dataset.act;
   setStatus('Saving…','warn');
   try{
+    let res;
     if(act==='settle'||act==='unsettle'){
-      const it=ledger.find(x=>String(x.id)===String(id));
+      const it=ledger.find(x=>x.id===id);
       it.settled=(act==='settle');render();
-      await api('POST',{action:'update',id,settled:it.settled});
+      res=await sb.from('ledger').update({settled:it.settled}).eq('id',id);
     }else if(act==='delete'){
-      ledger=ledger.filter(x=>String(x.id)!==String(id));render();
-      await api('POST',{action:'delete',id});
+      ledger=ledger.filter(x=>x.id!==id);render();
+      res=await sb.from('ledger').delete().eq('id',id);
     }else if(act==='paymonth'||act==='unpaymonth'){
-      const b=recurring.find(x=>String(x.id)===String(id));
+      const b=recurring.find(x=>x.id===id);
       b.paidMonth=(act==='paymonth')?monthKey():'';render();
-      await api('POST',{action:'payRecurring',id,paidMonth:b.paidMonth});
+      res=await sb.from('recurring').update({paid_month:b.paidMonth}).eq('id',id);
     }else if(act==='delrec'){
-      recurring=recurring.filter(x=>String(x.id)!==String(id));render();
-      await api('POST',{action:'deleteRecurring',id});
-    }
+      recurring=recurring.filter(x=>x.id!==id);render();
+      res=await sb.from('recurring').delete().eq('id',id);
+    }else return;
+    if(res.error)throw res.error;
     setStatus('Connected','ok');
-  }catch(err){setStatus('Save failed — refresh','err');}
+  }catch(err){console.error(err);setStatus('Save failed — refresh','err');}
 });
 
 /* ---------------- SETTLE ALL ---------------- */
 $('settleAll').onclick=async()=>{
+  const month=monthKey();
   const openLedger=ledger.filter(i=>!i.settled);
-  const dueRec=recurring.filter(b=>b.paidMonth!==monthKey());
+  const dueRec=recurring.filter(b=>b.paidMonth!==month);
   const total=openLedger.length+dueRec.length;
   if(!total)return;
   if(!confirm(`Mark all ${total} open items settled? (Ledger items settle; this month's recurring bills mark paid.)`))return;
   ledger.forEach(i=>i.settled=true);
-  recurring.forEach(b=>b.paidMonth=monthKey());
+  recurring.forEach(b=>b.paidMonth=month);
   render();
   setStatus('Saving…','warn');
-  try{await api('POST',{action:'settleAll',month:monthKey()});setStatus('Connected','ok');}
-  catch(e){setStatus('Save failed — refresh','err');}
+  try{
+    const a=await sb.from('ledger').update({settled:true}).eq('settled',false);
+    if(a.error)throw a.error;
+    const b=await sb.from('recurring').update({paid_month:month}).neq('paid_month',month);
+    if(b.error)throw b.error;
+    setStatus('Connected','ok');
+  }catch(e){console.error(e);setStatus('Save failed — refresh','err');}
 };
 
 /* ---------------- RESET ---------------- */
 $('resetHousehold').onclick=async()=>{
-  if(!confirm('Reset the household roster? This clears the people list (expenses stay). You will re-enter names.'))return;
-  try{await api('POST',{action:'resetConfig'});config=null;setupCount=2;showSetup();}
-  catch(e){setStatus('Reset failed','err');}
+  if(!confirm('Reset the household? This deletes the roster, every expense and every standing bill. It cannot be undone.'))return;
+  setStatus('Resetting…','warn');
+  try{
+    for(const t of ['ledger','recurring','people']){
+      const {error}=await sb.from(t).delete().gte('id',0);
+      if(error)throw error;
+    }
+    config=null;ledger=[];recurring=[];chipState={};setupCount=2;
+    showSetup();
+    setStatus('Connected','ok');
+  }catch(e){console.error(e);setStatus('Reset failed','err');}
 };
 
 $('refreshBtn').onclick=loadData;
 ['fItem','fPrice','fNote'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')$('addBtn').click();}));
 
-$('connectBtn').onclick=async()=>{
-  const url=$('urlInput').value.trim();
-  if(!url.endsWith('/exec')){setStatus('URL should end in /exec','err');return;}
-  API=url;localStorage.setItem(URL_KEY,url);await loadData();
-};
+// A number input happily accepts '-' and 'e'; neither belongs in a price.
+$('fPrice').addEventListener('keydown',e=>{
+  if(e.key==='-'||e.key==='+'||e.key==='e'||e.key==='E')e.preventDefault();
+});
+// Paste and spinner routes bypass keydown, so clamp on the way in too.
+$('fPrice').addEventListener('input',()=>{
+  const el=$('fPrice');
+  if(el.value.startsWith('-'))el.value=el.value.replace(/-/g,'');
+});
 
 /* ---------------- BOOT ---------------- */
-(function(){
-  const saved=localStorage.getItem(URL_KEY);
-  if(saved){$('urlInput').value=saved;API=saved;loadData();}
-})();
+if(connect()){
+  await loadData();
+  subscribeRealtime();
+}
 </script>
 </body>
 </html>
